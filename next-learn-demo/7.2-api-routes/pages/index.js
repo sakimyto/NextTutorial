@@ -1,8 +1,23 @@
+import { useRouter } from 'next/router'
+import useSWR from 'swr'
+
+function fetcher(url) {
+  return fetch(url).then(r => r.json())
+}
+
 export default function Index() {
+  const { query } = useRouter()
+  const { data, error } = useSWR(`/api/randomQuote${query.author ? '?author=' + query.author : ''}`, fetcher)
+  const author = data?.author
+  let quote = data?.quote
+
+  if (!data) quote = 'Loading...'
+  if (error) quote = 'Failed to fetch the quote.'
+
   return (
     <main className="center">
-      <div className="quote">Write tests, not too many, mostly integration</div>
-      <span className="author"> - Guillermo Rauch </span>
+      <div className="quote">{quote}</div>
+      {author && <span className="author">- {author}</span>}
 
       <style jsx>{`
         main {
